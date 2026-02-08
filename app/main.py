@@ -5,15 +5,14 @@ def cache(func: Callable) -> Callable:
     story = {}
 
     def wrapper(*args, **kwargs) -> Any:
-        if args in story or tuple(kwargs.values()) in story:
+        key = (args, tuple(sorted(kwargs.items())))
+        if key in story:
             print("Getting from cache")
-        else:
-            if len(args) != 0:
-                story[args] = func(*args, **kwargs)
-            else:
-                story[tuple(kwargs.values())] = func(*args, **kwargs)
-            print("Calculating new result")
-        return story[args] if len(args) != 0 else story[tuple(kwargs.values())]
+            return story[key]
+        print("Calculating new result")
+        result = func(*args, **kwargs)
+        story[key] = result
+        return result
     return wrapper
 
 
@@ -24,5 +23,6 @@ def long_time_func(number_one: int, number_two: int, number_three: int) -> int:
 
 
 @cache
-def long_time_func_2(n_tuple: tuple, power: int) -> list:
-    return [number ** power for number in n_tuple]
+def long_time_func2(number_1: int, number_2: int, number_3: int) -> int:
+    return ((number_1 ** number_2 ** number_3)
+            % (number_1 * number_3))
